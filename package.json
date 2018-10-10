@@ -1,0 +1,15 @@
+{
+  "name": "gh-prls",
+  "version": "1.0.0",
+  "description": "List open PRs for a github organization.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT License",
+  "dependencies": {
+    "@octokit/rest": "^15.13.0",
+    "console.table": "^0.10.0"
+  },
+  "bin": "./bin/gh-prls.js"
+}
