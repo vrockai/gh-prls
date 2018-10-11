@@ -5,11 +5,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "vrockai",
   "license": "MIT License",
   "dependencies": {
     "@octokit/rest": "^15.13.0",
     "console.table": "^0.10.0"
   },
-  "bin": "./bin/gh-prls.js"
+  "bin": "./bin/gh-prls.js",
+  "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vrockai/gh-prls.git"
+  }
 }
