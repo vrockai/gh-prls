@@ -12,9 +12,6 @@ Tested with node v9.8.0.
 [https://github.com/settings/tokens](https://github.com/settings/tokens)), i.e.:
 `export GITHUB_TOKEN="asdfrf234424d43d4d23"`
 2. Run the command specifying your organization name as its first argument, i.e.:
-`gh-prls cypress-io`
-
-The output should look like:
 ```
 $ gh-prls GMOD
 Repo              Author           Title                                                                                    Reviewers  URL                                             
@@ -37,3 +34,7 @@ Apollo            malcook          modify GFF3 export to (a) comport with GVF4.x
 Apollo            nathandunn       Joss submit 1                                                                                       https://github.com/GMOD/Apollo/pull/1235        
 cram-js           cmdcolin         Add binary parser test back into cram-js                                                            https://github.com/GMOD/cram-js/pull/3       
 ```
+
+# Acknowledgment
+
+Based on [kfatehi's gist](https://gist.github.com/kfatehi/ff12772c852da1fe8a2c88a5e3f1bfb3).
