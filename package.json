@@ -1,6 +1,6 @@
 {
   "name": "gh-prls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "List open PRs for a github organization.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
