@@ -23,7 +23,7 @@ function ghPrls() {
         .then(generatePrTable)
         .then(console.table);
 
-////////////
+    ////////////
 
     function getOrgRepos(orgDto) {
         return orgDto.data.map(repository => repository.name);
@@ -42,10 +42,10 @@ function ghPrls() {
     }
 
     function generatePrTable(allReposPrs) {
-        const prTableData = [];
-
-        allReposPrs.forEach(repoPrs => {
-            repoPrs.data.forEach(pr => {
+        return allReposPrs
+            .map(repoPrs => repoPrs.data)
+            .reduce((prList, prSublist) => prList.concat(prSublist), [])
+            .reduce((prTableData, pr) => {
                 const {
                     _links,
                     title,
@@ -53,6 +53,7 @@ function ghPrls() {
                 } = pr;
 
                 const reviewers = pr.requested_reviewers.map(reviewer => reviewer.login);
+
                 prTableData.push({
                     Repo: `${pr.base.repo.name}`,
                     Author: `${login}`,
@@ -60,10 +61,9 @@ function ghPrls() {
                     Reviewers: `${reviewers}`,
                     URL: `${_links.html.href}`
                 });
-            });
-        });
 
-        return prTableData;
+                return prTableData;
+            }, []);
     }
 }
 
