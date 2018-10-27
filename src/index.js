@@ -1,13 +1,13 @@
 require('console.table');
 
-function ghPrls() {
+function githubPrList() {
     const GitHubApi = require("@octokit/rest");
     const organization = process.argv[2];
     const github = new GitHubApi();
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
     if (!organization) {
-        process.exit();
+        return process.exit();
     }
 
     if (GITHUB_TOKEN) {
@@ -17,7 +17,7 @@ function ghPrls() {
         });
     }
 
-    github.repos.getForOrg({org: organization, type: 'sources'})
+    return github.repos.getForOrg({org: organization, type: 'sources'})
         .then(getOrgRepos)
         .then(getAllReposPRs)
         .then(generatePrTable)
@@ -67,4 +67,4 @@ function ghPrls() {
     }
 }
 
-module.exports = ghPrls;
+module.exports = githubPrList;
