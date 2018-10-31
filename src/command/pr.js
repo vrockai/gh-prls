@@ -1,7 +1,11 @@
 require('console.table');
 const github = require('../util/github')();
+const chalk = require('chalk');
 
-function githubPrList(args) {
+async function githubPrList(args) {
+
+    const loggedInUser = await github.users.get({})
+        .then(dto => dto.data.login);
 
     return github.repos.getForOrg({org: args.owner, type: 'sources'})
         .then(getOrgRepos)
@@ -38,11 +42,11 @@ function githubPrList(args) {
                     user: {login},
                 } = pr;
 
-                const reviewers = pr.requested_reviewers.map(reviewer => reviewer.login);
+                const reviewers = pr.requested_reviewers.map(reviewer => markCurrentUser(reviewer.login));
 
                 prTableData.push({
                     Repo: `${pr.base.repo.name}`,
-                    Author: `${login}`,
+                    Author: `${markCurrentUser(login)}`,
                     Title: `${title}`,
                     Reviewers: `${reviewers}`,
                     URL: `${_links.html.href}`
@@ -50,6 +54,10 @@ function githubPrList(args) {
 
                 return prTableData;
             }, []);
+    }
+
+    function markCurrentUser(user) {
+        return user === loggedInUser ? chalk.red(user) : user;
     }
 }
 
