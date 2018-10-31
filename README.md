@@ -1,8 +1,8 @@
-# gh-prls
+# gh-tools
 
 # Install
 
-`npm i gh-prls -g`
+`npm i gh-tools -g`
 
 Tested with node v9.8.0.
 
@@ -13,7 +13,7 @@ Tested with node v9.8.0.
 `export GITHUB_TOKEN="asdfrf234424d43d4d23"`
 2. Run the command specifying your organization name as its first argument, i.e.:
 ```
-$ gh-prls GMOD
+$ gh-tools pr --owner GMOD
 Repo              Author           Title                                                                                    Reviewers  URL                                             
 ----------------  ---------------  ---------------------------------------------------------------------------------------  ---------  ------------------------------------------------
 jbrowse           cmdcolin         Add unprocessed transcript glyph                                                                    https://github.com/GMOD/jbrowse/pull/1230       

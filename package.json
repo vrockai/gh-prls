@@ -1,7 +1,7 @@
 {
-  "name": "gh-prls",
-  "version": "1.0.1",
-  "description": "List open PRs for a github organization.",
+  "name": "gh-tools",
+  "version": "2.0.0",
+  "description": "A single endpoint to several github statistics.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -9,12 +9,13 @@
   "license": "MIT License",
   "dependencies": {
     "@octokit/rest": "^15.13.0",
-    "console.table": "^0.10.0"
+    "console.table": "^0.10.0",
+    "yargs": "12.0.2"
   },
-  "bin": "./bin/gh-prls.js",
+  "bin": "./bin/gh-tools.js",
   "preferGlobal": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/vrockai/gh-prls.git"
+    "url": "https://github.com/vrockai/gh-tools.git"
   }
 }
