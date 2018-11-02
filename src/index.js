@@ -7,11 +7,11 @@ function main() {
         .usage('Usage: $0 <command> [options]')
         .option('owner')
         .command('pr',
-            'List PRs in an organization.',
+            'List all PRs within an organization.',
             (yargs) => yargs
                 .option('owner', {
                     alias: 'o',
-                    describe: 'Organization name'
+                    describe: 'Organization name.'
                 })
                 .demandOption(['owner']),
             commandPr)
@@ -20,8 +20,9 @@ function main() {
             (yargs) => yargs
                 .option('since', {
                     alias: 's',
-                    describe: 'Date since when you want to list new contributors.',
-                    default: '2018-10-01T00:00:00Z'
+                    describe: 'Date since when you want to list new contributors. By default, the first day of the ' +
+                    'current month is used.',
+                    default: getFirstDayOfMonth()
                 })
                 .option('owner', {
                     alias: 'o',
@@ -38,9 +39,17 @@ function main() {
         .help('help')
         .alias('help', 'h')
         .alias('version', 'v')
-        .epilog(`Check ... for more details`)
+        .epilog('Set the GITHUB_TOKEN env variable for authenticated access. Check ' +
+            'https://github.com/vrockai/gh-tools for more details.')
         .strict()
         .argv;
+
+    ////////////
+
+    function getFirstDayOfMonth() {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth());
+    }
 }
 
 module.exports = main;
