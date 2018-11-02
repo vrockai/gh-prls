@@ -1,17 +1,23 @@
 require('console.table');
 const _ = require('lodash');
+const config = require('../util/config');
 const github = require('../util/github')();
+const paginate = require('../util/paginate');
 
 async function contributors(args) {
-    const PER_PAGE = 100;
     const SINCE_DATE = new Date(args.since);
 
     const users = await getLastMonthsUsers();
     const userCommits = _.map(users, getUserCommits);
 
-    const filterUnique = list => _.filter(list, {isUniq: true});
+    const filterUnique = list => _.filter(list, {isRecent: true});
     const preprocessTable = (list) => _.map(list, (user) => {
-        return {Login: user.author.login, Username: user.author.name, Url: user.author.url, Date: user.date}
+        return {
+            Login: user.author.login,
+            Username: user.author.name,
+            Url: user.author.url,
+            Date: user.date
+        }
     });
 
     Promise.all(userCommits)
@@ -21,35 +27,46 @@ async function contributors(args) {
 
     ////////////
 
-    function getUsers(dto) {
-        return _(dto.data)
+    function getUsers(userList) {
+        return _(userList)
             .map('author.login')
             .uniq()
             .value();
     }
 
-    function getLastMonthsUsers() {
-        return github.repos.getCommits({owner: args.owner, repo: args.repository, per_page: PER_PAGE, since: args.since})
-            .then(getUsers);
+    async function getLastMonthsUsers() {
+        const userList = await paginate(github.repos.getCommits, {
+            owner: args.owner,
+            repo: args.repository,
+            per_page: config.PER_PAGE,
+            since: args.since
+        });
+
+        return getUsers(userList);
     }
 
-    function getUserCommits(author) {
-        return github.repos.getCommits({owner: args.owner, repo: args.repository, per_page: PER_PAGE, author: author})
-            .then((dto) => {
-                const lastCommit = _.last(dto.data);
-                const authorDto = _.get(lastCommit, 'author');
-                const authorCommitDto = _.get(lastCommit, 'commit.author');
-                const lastDate = _.get(lastCommit, 'commit.author.date');
-                const lastCommitDate = new Date(lastDate);
+    async function getUserCommits(author) {
+        const commitList = await paginate(github.repos.getCommits, {
+            owner: args.owner,
+            repo: args.repository,
+            per_page: config.PER_PAGE,
+            author: author
+        });
 
-                return {
-                    author: {
-                        ...authorCommitDto,
-                        ...authorDto
-                    },
-                    date: lastDate,
-                    isUniq: lastDate ? SINCE_DATE <= lastCommitDate : false};
-            });
+        const lastCommit = _.last(commitList);
+        const authorDto = _.get(lastCommit, 'author');
+        const authorCommitDto = _.get(lastCommit, 'commit.author');
+        const lastDate = _.get(lastCommit, 'commit.author.date');
+        const lastCommitDate = new Date(lastDate);
+
+        return {
+            author: {
+                ...authorCommitDto,
+                ...authorDto
+            },
+            date: lastDate,
+            isRecent: lastDate ? SINCE_DATE <= lastCommitDate : false
+        };
     }
 }
 

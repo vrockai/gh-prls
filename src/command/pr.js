@@ -1,39 +1,39 @@
 require('console.table');
 const github = require('../util/github')();
 const chalk = require('chalk');
+const config = require('../util/config');
+const paginate = require('../util/paginate');
 
 async function githubPrList(args) {
 
     const loggedInUser = await github.users.get({})
         .then(dto => dto.data.login);
 
-    return github.repos.getForOrg({org: args.owner, type: 'sources'})
-        .then(getOrgRepos)
-        .then(getAllReposPRs)
-        .then(generatePrTable)
-        .then(console.table);
+    const repoList = await paginate(github.repos.getForOrg, {
+        org: args.owner,
+        type: 'sources',
+        per_page: config.PER_PAGE,
+    });
+
+    const repoNameList = repoList.map(repository => repository.name);
+    const prList = await getAllReposPRs(repoNameList);
+    const prTable = generatePrTable(prList);
+
+    return console.table(prTable);
 
     ////////////
 
-    function getOrgRepos(orgDto) {
-        return orgDto.data.map(repository => repository.name);
-    }
-
-    function getAllReposPRs(repositories) {
-        const allPRs = repositories.map(repository => {
-            return github.pullRequests.getAll({
-                state: 'open',
-                owner: args.owner,
-                repo: repository
-            });
-        });
-
-        return Promise.all(allPRs);
+    async function getAllReposPRs(repos) {
+        return Promise.all(repos.map(repo => paginate(github.pullRequests.getAll, {
+            state: 'open',
+            owner: args.owner,
+            repo: repo,
+            per_page: config.PER_PAGE,
+        })));
     }
 
     function generatePrTable(allReposPrs) {
         return allReposPrs
-            .map(repoPrs => repoPrs.data)
             .reduce((prList, prSublist) => prList.concat(prSublist), [])
             .reduce((prTableData, pr) => {
                 const {
