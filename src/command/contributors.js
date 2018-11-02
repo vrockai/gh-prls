@@ -3,12 +3,20 @@ const _ = require('lodash');
 const config = require('../util/config');
 const github = require('../util/github')();
 const paginate = require('../util/paginate');
+const errorHandler = require('../util/errorHandler');
 
 async function contributors(args) {
     const SINCE_DATE = new Date(args.since);
 
-    const users = await getLastMonthsUsers();
-    const userCommits = _.map(users, getUserCommits);
+    let users;
+    let userCommits;
+
+    try {
+        users = await getLastMonthsUsers();
+        userCommits = _.map(users, getUserCommits);
+    } catch (e) {
+        errorHandler(`Error accessing commits from ${args.owner}/${args.repo}.`);
+    }
 
     const filterUnique = list => _.filter(list, {isRecent: true});
     const preprocessTable = (list) => _.map(list, (user) => {

@@ -3,20 +3,36 @@ const github = require('../util/github')();
 const chalk = require('chalk');
 const config = require('../util/config');
 const paginate = require('../util/paginate');
+const errorHandler = require('../util/errorHandler');
 
 async function githubPrList(args) {
 
     const loggedInUser = await github.users.get({})
         .then(dto => dto.data.login);
 
-    const repoList = await paginate(github.repos.getForOrg, {
-        org: args.owner,
-        type: 'sources',
-        per_page: config.PER_PAGE,
-    });
+    let repoList;
+    try {
+        repoList = await paginate(github.repos.getForOrg, {
+            org: args.owner,
+            type: 'sources',
+            per_page: config.PER_PAGE,
+        });
+    } catch (e) {
+        errorHandler(`Organization ${args.owner} not found.`);
+    }
+
+    console.log('repoList', repoList);
 
     const repoNameList = repoList.map(repository => repository.name);
-    const prList = await getAllReposPRs(repoNameList);
+
+
+    let prList;
+    try {
+        prList = await getAllReposPRs(repoNameList);
+    } catch (e) {
+        errorHandler(`Error while accession ${args.owner} repositories.`);
+    }
+
     const prTable = generatePrTable(prList);
 
     return console.table(prTable);
