@@ -1,17 +1,22 @@
 # gh-tools
 
-# Install
+## Install
 
 `npm i gh-tools -g`
 
 Tested with node v9.8.0.
 
-# Usage
+## Usage
 
-1. Set the `GITHUB_TOKEN` ENV variable to contain your personal access token (get your token on 
+Set the `GITHUB_TOKEN` ENV variable to contain your personal access token (get your token on 
 [https://github.com/settings/tokens](https://github.com/settings/tokens)), i.e.:
-`export GITHUB_TOKEN="asdfrf234424d43d4d23"`
-2. Run the command specifying your organization name as its first argument, i.e.:
+`export GITHUB_TOKEN="asdfrf234424d43d4d23"` if you want to access private repositories.
+
+The `gh-tool --help` command should give you all the relevant information you need about the command itself.
+
+### Examples
+
+Listing open PRs withing an organization:
 ```
 $ gh-tools pr --owner GMOD
 Repo              Author           Title                                                                                    Reviewers  URL                                             
@@ -35,6 +40,16 @@ Apollo            nathandunn       Joss submit 1                                
 cram-js           cmdcolin         Add binary parser test back into cram-js                                                            https://github.com/GMOD/cram-js/pull/3       
 ```
 
-# Acknowledgment
+Listing new contributors since a specific date:
+```
+$ gh-tools contributors --owner kiali --repo kiali --since 2018-10-01T00:00:00.000Z
+Login      Username       Url                                     Date                
+---------  -------------  --------------------------------------  --------------------
+emmayang   Emma Yang      https://api.github.com/users/emmayang   2018-10-22T12:47:25Z
+matejgera  Matej Gera     https://api.github.com/users/matejgera  2018-10-18T23:09:16Z
+bhavin192  Bhavin Gandhi  https://api.github.com/users/bhavin192  2018-10-03T18:27:48Z
+```
 
-Based on [kfatehi's gist](https://gist.github.com/kfatehi/ff12772c852da1fe8a2c88a5e3f1bfb3).
+## Acknowledgment
+
+Inspired by [kfatehi's gist](https://gist.github.com/kfatehi/ff12772c852da1fe8a2c88a5e3f1bfb3).

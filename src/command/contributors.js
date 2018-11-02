@@ -37,7 +37,7 @@ async function contributors(args) {
     async function getLastMonthsUsers() {
         const userList = await paginate(github.repos.getCommits, {
             owner: args.owner,
-            repo: args.repository,
+            repo: args.repo,
             per_page: config.PER_PAGE,
             since: args.since
         });
@@ -48,7 +48,7 @@ async function contributors(args) {
     async function getUserCommits(author) {
         const commitList = await paginate(github.repos.getCommits, {
             owner: args.owner,
-            repo: args.repository,
+            repo: args.repo,
             per_page: config.PER_PAGE,
             author: author
         });

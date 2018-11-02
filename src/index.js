@@ -28,11 +28,11 @@ function main() {
                     alias: 'o',
                     describe: 'Repository owner.'
                 })
-                .option('repository', {
+                .option('repo', {
                     alias: 'r',
                     describe: 'Repository name.'
                 })
-                .demandOption(['owner', 'repository']),
+                .demandOption(['owner', 'repo']),
             commandContributors)
         .demandCommand(1, 'You need at least one command before moving on')
         .example('$0 pr --owner kiali')
