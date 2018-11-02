@@ -3,11 +3,6 @@ const github = new GitHubApi();
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 function getGithubClient() {
-    if (!GITHUB_TOKEN) {
-        console.log('Error: GITHUB_TOKEN environment variable not set.');
-        process.exit(1);
-    }
-
     if (GITHUB_TOKEN) {
         github.authenticate({
             type: 'token',
