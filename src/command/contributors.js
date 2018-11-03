@@ -8,6 +8,10 @@ const errorHandler = require('../util/errorHandler');
 // New contributor is a contributor who has commits after the "since" date, but doesn't have commits until the "since"
 // date.
 async function contributors(args) {
+    if (!Date.parse(args.since)) {
+        errorHandler(`Invalid date format: ${args.since}`);
+    }
+
     const SINCE_DATE = new Date(args.since);
 
     // Get repo names by either:
@@ -19,7 +23,7 @@ async function contributors(args) {
     const allCommitsSince = await Promise.all(_.map(_repoNames, getLastMonthsCommits)).then(_.flatten);
 
     return Promise.all(allCommitsSince)
-        // Extract all authors from the commit list.
+    // Extract all authors from the commit list.
         .then(getAuthors)
         .then(_.flatten)
         // Check if authors have older commits.
@@ -82,13 +86,17 @@ async function contributors(args) {
             function hasCommitsBeforeSince(repo) {
                 const _isCommitListEmpty = (dto) => !dto.data.length;
 
-                return github.repos.getCommits({
-                    author: user.login,
-                    owner: args.owner,
-                    repo: repo,
-                    per_page: config.PER_PAGE,
-                    until: SINCE_DATE
-                }).then(_isCommitListEmpty, () => true);
+                try {
+                    return github.repos.getCommits({
+                        author: user.login,
+                        owner: args.owner,
+                        repo: repo,
+                        per_page: config.PER_PAGE,
+                        until: SINCE_DATE
+                    }).then(_isCommitListEmpty, () => true);
+                } catch (e) {
+                    errorHandler(`Error fetching commits in ${args.owner}/${repo} for ${user.login}`);
+                }
             }
         }
     }
@@ -98,11 +106,16 @@ async function contributors(args) {
             return [args.repo];
         }
 
-        const repos = await paginate(github.repos.getForOrg, {
-            org: args.owner,
-            type: 'sources',
-            per_page: config.PER_PAGE,
-        });
+        let repos;
+        try {
+            repos = await paginate(github.repos.getForOrg, {
+                org: args.owner,
+                type: 'sources',
+                per_page: config.PER_PAGE,
+            });
+        } catch (e) {
+            errorHandler(`Error fetching repositories in ${args.owner}`);
+        }
 
         return _.map(repos, 'name');
     }
@@ -115,12 +128,17 @@ async function contributors(args) {
     }
 
     async function getLastMonthsCommits(repo) {
-        return await paginate(github.repos.getCommits, {
-            owner: args.owner,
-            repo: repo,
-            per_page: config.PER_PAGE,
-            since: SINCE_DATE
-        });
+        try {
+            return await paginate(github.repos.getCommits, {
+                owner: args.owner,
+                repo: repo,
+                per_page: config.PER_PAGE,
+                since: SINCE_DATE
+            });
+        } catch (e) {
+            console.log(e);
+            errorHandler(`1 Error fetching commits in ${args.owner}/${repo}`);
+        }
     }
 }
 
