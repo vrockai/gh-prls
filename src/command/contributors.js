@@ -5,76 +5,122 @@ const github = require('../util/github')();
 const paginate = require('../util/paginate');
 const errorHandler = require('../util/errorHandler');
 
+// New contributor is a contributor who has commits after the "since" date, but doesn't have commits until the "since"
+// date.
 async function contributors(args) {
     const SINCE_DATE = new Date(args.since);
 
-    let users;
-    let userCommits;
+    // Get repo names by either:
+    // 1. Use the repo specified by the `--repo` argument.
+    // 2. Fetch all the repos from the organization specified by the `--owner` argument.
+    let _repoNames = await getRepoNames(args, github);
 
-    try {
-        users = await getLastMonthsUsers();
-        userCommits = _.map(users, getUserCommits);
-    } catch (e) {
-        errorHandler(`Error accessing commits from ${args.owner}/${args.repo}.`);
-    }
+    // Get all commits across all repos since the specified date.
+    const allCommitsSince = await Promise.all(_.map(_repoNames, getLastMonthsCommits)).then(_.flatten);
 
-    const filterUnique = list => _.filter(list, {isRecent: true});
-    const preprocessTable = (list) => _.map(list, (user) => {
-        return {
-            Login: user.author.login,
-            Username: user.author.name,
-            Url: user.author.url,
-            Date: user.date
-        }
-    });
-
-    Promise.all(userCommits)
-        .then(filterUnique)
-        .then(preprocessTable)
+    return Promise.all(allCommitsSince)
+        // Extract all authors from the commit list.
+        .then(getAuthors)
+        .then(_.flatten)
+        // Check if authors have older commits.
+        .then(haveOlderCommits)
+        // Filter authors with older commits.
+        .then(author => _.filter(author, {isNewContributor: true}))
+        // Combine the author data with commit data for the resulting table.
+        .then(_.curry(processTable)(allCommitsSince))
         .then(console.table);
 
     ////////////
 
-    function getUsers(userList) {
-        return _(userList)
-            .map('author.login')
-            .uniq()
+    function processTable(allCommitsSince, authorList) {
+        return _.map(authorList, (author) => {
+
+            const _isCurrentAuthor = commit => commit.author.login === author.login;
+            const _getCommiterDate = commit => new Date(commit.committer.date);
+
+            const lastCommitByAuthor = _(allCommitsSince)
+                .filter(_isCurrentAuthor)
+                .sortBy(_getCommiterDate)
+                .last();
+
+            const contributionDate = new Date(lastCommitByAuthor.commit.committer.date).toLocaleDateString();
+
+            return {
+                Login: author.login,
+                Url: author.url,
+                'Contributor Since': contributionDate,
+                'Commit': lastCommitByAuthor.url
+            }
+        });
+    }
+
+    function haveOlderCommits(userList) {
+        // Compute the 'isNewContributor' value for each user.
+        const extendedUserList = _.map(userList, fetchCommitsBeforeSince);
+
+        return Promise.all(extendedUserList);
+
+        ////////////
+
+        function fetchCommitsBeforeSince(user) {
+            // Find if user has commits before since in each repo.
+            const _hasCommitsBeforeSince = _.map(_repoNames, hasCommitsBeforeSince);
+
+            return Promise.all(_hasCommitsBeforeSince)
+            // Add the 'isNewContributor' field based on the existence of commits before since.
+                .then(extendUserDto);
+
+            ////////////
+
+            function extendUserDto(commitsBeforeSince) {
+                return {
+                    ...user,
+                    isNewContributor: _.every(commitsBeforeSince, commitBeforeSince => commitBeforeSince === true)
+                }
+            }
+
+            function hasCommitsBeforeSince(repo) {
+                const _isCommitListEmpty = (dto) => !dto.data.length;
+
+                return github.repos.getCommits({
+                    author: user.login,
+                    owner: args.owner,
+                    repo: repo,
+                    per_page: config.PER_PAGE,
+                    until: SINCE_DATE
+                }).then(_isCommitListEmpty, () => true);
+            }
+        }
+    }
+
+    async function getRepoNames(args, github) {
+        if (args.repo) {
+            return [args.repo];
+        }
+
+        const repos = await paginate(github.repos.getForOrg, {
+            org: args.owner,
+            type: 'sources',
+            per_page: config.PER_PAGE,
+        });
+
+        return _.map(repos, 'name');
+    }
+
+    function getAuthors(commitList) {
+        return _(commitList)
+            .uniqBy('author.login')
+            .map('author')
             .value();
     }
 
-    async function getLastMonthsUsers() {
-        const userList = await paginate(github.repos.getCommits, {
+    async function getLastMonthsCommits(repo) {
+        return await paginate(github.repos.getCommits, {
             owner: args.owner,
-            repo: args.repo,
+            repo: repo,
             per_page: config.PER_PAGE,
-            since: args.since
+            since: SINCE_DATE
         });
-
-        return getUsers(userList);
-    }
-
-    async function getUserCommits(author) {
-        const commitList = await paginate(github.repos.getCommits, {
-            owner: args.owner,
-            repo: args.repo,
-            per_page: config.PER_PAGE,
-            author: author
-        });
-
-        const lastCommit = _.last(commitList);
-        const authorDto = _.get(lastCommit, 'author');
-        const authorCommitDto = _.get(lastCommit, 'commit.author');
-        const lastDate = _.get(lastCommit, 'commit.author.date');
-        const lastCommitDate = new Date(lastDate);
-
-        return {
-            author: {
-                ...authorCommitDto,
-                ...authorDto
-            },
-            date: lastDate,
-            isRecent: lastDate ? SINCE_DATE <= lastCommitDate : false
-        };
     }
 }
 

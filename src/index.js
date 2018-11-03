@@ -32,7 +32,7 @@ function main() {
                     alias: 'r',
                     describe: 'Repository name.'
                 })
-                .demandOption(['owner', 'repo']),
+                .demandOption(['owner']),
             commandContributors)
         .demandCommand(1, 'You need at least one command before moving on')
         .example('$0 pr --owner kiali')
