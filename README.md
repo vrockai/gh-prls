@@ -16,6 +16,7 @@ The `gh-tool --help` command should give you all the relevant information you ne
 
 ### Examples
 
+### gh-tools pr
 Listing open PRs withing an organization:
 ```
 $ gh-tools pr --owner GMOD
@@ -40,14 +41,30 @@ Apollo            nathandunn       Joss submit 1                                
 cram-js           cmdcolin         Add binary parser test back into cram-js                                                            https://github.com/GMOD/cram-js/pull/3       
 ```
 
-Listing new contributors since a specific date:
+### gh-tools contributors
+Listing new contributors of a specific repo since a specific date:
 ```
-$ gh-tools contributors --owner kiali --repo kiali --since 2018-10-01T00:00:00.000Z
-Login      Username       Url                                     Date                
----------  -------------  --------------------------------------  --------------------
-emmayang   Emma Yang      https://api.github.com/users/emmayang   2018-10-22T12:47:25Z
-matejgera  Matej Gera     https://api.github.com/users/matejgera  2018-10-18T23:09:16Z
-bhavin192  Bhavin Gandhi  https://api.github.com/users/bhavin192  2018-10-03T18:27:48Z
+$ gh-tools contributors -o kiali -r kiali -s 2018-10-01T00:00:00.000Z
+Login      Url                                     Contributor Since  Commit                                                                                   
+---------  --------------------------------------  -----------------  -----------------------------------------------------------------------------------------
+emmayang   https://api.github.com/users/emmayang   2018-10-22         https://api.github.com/repos/kiali/kiali/commits/fe7d120c4c59951c7f7cb99c6b52f5b2eb646524
+matejgera  https://api.github.com/users/matejgera  2018-10-19         https://api.github.com/repos/kiali/kiali/commits/cd91678b27dc6e0f0bbe668957884a1269ab3d9a
+bhavin192  https://api.github.com/users/bhavin192  2018-10-14         https://api.github.com/repos/kiali/kiali/commits/2b881d6d43767835640e3754e2787f609bac252f
+hunchback  https://api.github.com/users/hunchback  2018-10-2          https://api.github.com/repos/kiali/kiali/commits/4343ee49e98fca0e6cf1738f5853c852ed4dc0cb
+```
+
+Listing new contributors of across all the repos in an organization since a specific date:
+```
+$ gh-tools contributors -o kiali -s 2018-10-01T00:00:00.000Z
+Login         Url                                        Contributor Since  Commit                                                                                      
+------------  -----------------------------------------  -----------------  --------------------------------------------------------------------------------------------
+emmayang      https://api.github.com/users/emmayang      2018-10-22         https://api.github.com/repos/kiali/kiali/commits/fe7d120c4c59951c7f7cb99c6b52f5b2eb646524   
+matejgera     https://api.github.com/users/matejgera     2018-10-19         https://api.github.com/repos/kiali/kiali/commits/cd91678b27dc6e0f0bbe668957884a1269ab3d9a   
+bhavin192     https://api.github.com/users/bhavin192     2018-10-14         https://api.github.com/repos/kiali/kiali/commits/2b881d6d43767835640e3754e2787f609bac252f   
+hunchback     https://api.github.com/users/hunchback     2018-10-2          https://api.github.com/repos/kiali/kiali/commits/4343ee49e98fca0e6cf1738f5853c852ed4dc0cb   
+vanillaSlice  https://api.github.com/users/vanillaSlice  2018-10-5          https://api.github.com/repos/kiali/kiali-ui/commits/10a54ff7212cc870a374c445ce179ee343cef83e
+clyang82      https://api.github.com/users/clyang82      2018-10-15         https://api.github.com/repos/kiali/kiali-ui/commits/c16c4db7ed2f33803d1d2bbcd8db6269ea03bedf
+
 ```
 
 ## Acknowledgment
