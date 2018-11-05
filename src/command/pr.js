@@ -21,8 +21,6 @@ async function githubPrList(args) {
         errorHandler(`Organization ${args.owner} not found.`);
     }
 
-    console.log('repoList', repoList);
-
     const repoNameList = repoList.map(repository => repository.name);
 
 
